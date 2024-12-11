@@ -21,6 +21,17 @@ const expenses = {
     "2023-04": {}
 };
 
+// Funkcja obliczająca medianę z posortowanej funkcji
+function calculateMedianFromSortedArray(arr) {
+    const n = arr.length;
+    if (n === 0) return null;
+    if (n % 2 === 1) {
+        return arr[Math.floor(n / 2)];
+    } else {
+        return (arr[n / 2 - 1] + arr[n / 2]) / 2;
+    }
+}
+
 // Funkcja sprawdzająca, czy dany dzień jest przed pierwszą niedzielą w miesiącu
 function isBeforeFirstSunday(year, month, day) {
     // Ustalamy datę 1 dnia w miesiącu
@@ -39,6 +50,29 @@ function isBeforeFirstSunday(year, month, day) {
     return currentDay <= firstSunday;
 }
 
+// Funkcja iterująca po expenses i zwracająca tablicę wydatków przed pierwszą niedzielą
+function getExpensesBeforeFirstSunday(expenses) {
+    const allExpenses = [];
+
+    for (const yearMonth in expenses) {
+        const [year, month] = yearMonth.split("-").map(Number);
+        
+        for (const day in expenses[yearMonth]) {
+            const isBefore = isBeforeFirstSunday(year, month, Number(day));
+            
+            // Jeśli dzień jest przed pierwszą niedzielą, dodajemy wydatki do tablicy
+            if (isBefore) {
+                const dayExpenses = expenses[yearMonth][day];
+                for (const category in dayExpenses) {
+                    allExpenses.push(...dayExpenses[category]);
+                }
+            }
+        }
+    }
+
+    return allExpenses;
+}
+
 // Funkcja iterująca po expenses i zwracająca informację o dniu
 function checkExpensesBeforeFirstSunday(expenses) {
     const results = {};
@@ -55,6 +89,80 @@ function checkExpensesBeforeFirstSunday(expenses) {
     return results;
 }
 
+function solution1(expenses) {
+    let result = [];
+
+    // Iterowanie przez każdy rok i miesiąc
+    for (const yearMonth in expenses) {
+        const [year, month] = yearMonth.split("-").map(Number);
+
+        // Iterowanie przez dni w danym miesiącu
+        for (const day in expenses[yearMonth]) {
+            const isBefore = isBeforeFirstSunday(year, month, Number(day));
+
+            // Jeśli dzień jest przed pierwszą niedzielą, dodajemy wydatki do tablicy
+            if (isBefore) {
+                const dayExpenses = expenses[yearMonth][day];
+                
+                // Iterowanie przez kategorie wydatków w danym dniu
+                for (const category in dayExpenses) {
+                    result.push(...dayExpenses[category]);
+                }
+            }
+        }
+    }
+
+    // Niezoptymalizowane sortowanie bąbelkowe
+    for (let i = 0; i < result.length; i++) {
+        for (let j = 0; j < result.length - i - 1; j++) {
+            if (result[j] > result[j + 1]) {
+                // Zamiana miejscami
+                const temp = result[j];
+                result[j] = result[j + 1];
+                result[j + 1] = temp;
+            }
+        }
+    }
+
+    return calculateMedianFromSortedArray(result);
+}
+
+function solution2(expenses) {
+    let result = [];
+
+    // Iterowanie przez każdy rok i miesiąc
+    for (const yearMonth in expenses) {
+        const [year, month] = yearMonth.split("-").map(Number);
+
+        // Iterowanie przez dni w danym miesiącu
+        for (const day in expenses[yearMonth]) {
+            const isBefore = isBeforeFirstSunday(year, month, Number(day));
+
+            // Jeśli dzień jest przed pierwszą niedzielą, dodajemy wydatki do tablicy
+            if (isBefore) {
+                const dayExpenses = expenses[yearMonth][day];
+                
+                // Iterowanie przez kategorie wydatków w danym dniu
+                for (const category in dayExpenses) {
+                    result.push(...dayExpenses[category]);
+                }
+            }
+        }
+    }
+
+    // Zoptymalizowane sortowanie za pomocą wbudowanej metody sort()
+    result.sort((a, b) => a - b);
+
+    return calculateMedianFromSortedArray(result);
+}
+
+
 // Wywołanie funkcji
 const results = checkExpensesBeforeFirstSunday(expenses);
 console.log(results);
+const allExpensesBeforeFirstSunday = getExpensesBeforeFirstSunday(expenses);
+console.log(allExpensesBeforeFirstSunday);
+const solution1result = solution1(expenses);
+console.log("SOLUTION1:",solution1result);
+const solution2result = solution2(expenses);
+console.log("SOLUTION2:",solution2result)
